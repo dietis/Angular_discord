@@ -50,47 +50,83 @@ app.get('/', function (req, res) {
   res.send('Hello World!');
 });
 
+
 app.post('/register', function (req, res) {
     var the_result = "";
     var name = "";
     var password = "";
+
     if (req.body) {
         the_result = req.body;
         name = req.body.name;
         password = req.body.password;
     }
+
     var reg_connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'admin',
         password : 'root'
     });
+
     reg_connection.connect(function(err) {
         if (err) throw err;
         console.log("Connected!");
     });
-    var sql = "USE irc_server;";
+
+    var sql = "USE irc_server";
     reg_connection.query(sql, function (err, result) {
-        if (err) throw err;
+    if (err) throw err;
     });
-    var sql = "SELECT * FROM irc_users;";
+
+    var sql = "SELECT * FROM irc_users";
     reg_connection.query(sql, function (err, result) {
         if (err) throw err;
-         var found = false;
-        for (one_user in result) {
-            console.log(one_user);
+        var found = false;
+
+        for (var i = 0; i < result.length; i++) {
             var found = false;
-            if (one_user.name == name) {
-                console.log(one_user.name + ' name was thar');
+            if (result[i].pseudo == name) {
                 found = true;
+                console.log(result[i].pseudo + 'Aldready exist !');
             }
         }
         if (found == false) {
-            
+            //name	password	token
+            console.log(found + ' Status');
+            console.log(' Account added ' + name + ' | ' + password);
+
+            var sql = "INSERT INTO irc_users (pseudo, password, token) VALUES ?";
+            var values = [[name, password, '']];
+
+            reg_connection.query(sql, [values], function (err, result) {
+               if (err) throw err;
+                console.log("Number of records inserted: " + result.affectedRows);
+                reg_connection.end();
+            });
         }
         //res.json(result);
     });
-    reg_connection.end();
     res.json(the_result);
+});
+
+app.post('/getToken', function (req, res) {
+    if (req.body) {
+        the_result = req.body;
+        name = req.body.name;
+        password = req.body.password;
+    }
+
+    var reg_connection = mysql.createConnection({
+        host     : 'localhost',
+        user     : 'admin',
+        password : 'root'
+    });
+
+    reg_connection.connect(function(err) {
+        if (err) throw err;
+        console.log("Connected!");
+    });
+
 });
 
 app.listen(13008, function () {
