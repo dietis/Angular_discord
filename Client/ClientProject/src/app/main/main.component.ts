@@ -11,9 +11,6 @@ export class MainComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    $(window).click(function () {
-      alert('JQuery est installé');
-    });
 
   }
 
