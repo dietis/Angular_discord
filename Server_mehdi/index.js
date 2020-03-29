@@ -61,12 +61,17 @@ connection.query(sql, function (err, result) {
     console.log("Table created channel");
 });
 
-var room_name = "Salon de thé kouya";
-var sql = "INSERT INTO irc_channels (name) VALUES ?";
-var values = [[room_name]];
-
-connection.query(sql, [values], function (err, result) {
-   if (err) throw err;
+var room_name = ["Salon de thé kouya",
+                 "Salon des matrixé",
+                 "Salon des Uchiwas",
+                 "Salon des mangeurs de bonne bouffe"];
+room_name.forEach(function (item, index) {
+    var sql = "INSERT INTO irc_channels (name) VALUES ?";
+    var values = [[item]];
+    connection.query(sql, [values], function (err, result) {
+        if (err) throw err;
+        console.log("inserting channel "+ item);
+    });
 });
 
 //messages
@@ -85,26 +90,27 @@ app.get('/', function (req, res) {
   res.send('Hello World!');
 });
 
-const documents = {};
 var io = require('socket.io')(http);
-var user_rooms = {};
+var user_rooms = [{}];
 
 //ioconnection
 //io.set('origins', 'http://127.0.0.1:4200');
 
 io.on('connection', function (socket) {
     console.log('user connected');
-    socket.on('login', function (data) {
-        name = data.name;
-        room = data.room;
-        
-        if (user_rooms[user_co] == subject) {
-            [user_co] = subject;
+
+    socket.on('first_log', function (data) {
+        var name = data.name;
+        var room = data.room;
+        var subject = data.subject;
+
+        if (user_rooms[room] == room) {
+            user_rooms[room] = subject;
         } else {
-            socket.leave(user_rooms[user_co]);
-            console.log('user left room :' + user_rooms[user_co]);
+            socket.leave(user_rooms[room]);
+            console.log('user left room :' + user_rooms[room]);
             socket.join(subject);
-            [user_co] = subject;
+            user_rooms[user_co] = subject;
             console.log('user joined room :' + subject);
         }
         console.log(user_rooms);
@@ -114,7 +120,7 @@ io.on('connection', function (socket) {
         });
     });
     socket.on('disconnect', function () {
-    console.log('user disconnected');
+        console.log('user disconnected');
     });
 });  
   

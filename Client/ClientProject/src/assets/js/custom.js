@@ -72,9 +72,11 @@ $(function() {
             var reglage = 0;
 
             var socket = io('ws://localhost:3000', {transports: ['websocket']});
+
             socket.on('connect', function () {
-              console.log('connected!');
-              socket.emit('greet', { message: 'Hello Mr.Server!' });
+              console.log('connected socket !');
+                                    //dans subject on vettra la room choisit via le front
+              socket.emit('first_log', {subject: 'room', message: 'Hello everyone welcome  :', name : localStorage.getItem("name")});
             });
             
             socket.on('respond', function (data) {
