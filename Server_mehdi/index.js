@@ -91,39 +91,75 @@ app.get('/', function (req, res) {
 });
 
 var io = require('socket.io')(http);
-var user_rooms = [{}];
 
 //ioconnection
 //io.set('origins', 'http://127.0.0.1:4200');
 
+var connected = false;
+var name = "";
 io.on('connection', function (socket) {
-    console.log('user connected');
+    var sock = mysql.createConnection({
+        host     : 'localhost',
+        user     : 'admin',
+        password : 'root'
+    });
 
-    socket.on('first_log', function (data) {
-        var name = data.name;
-        var room = data.room;
-        var subject = data.subject;
+    sock.connect(function(err) {
+        if (err) throw err;
+        console.log("Connected db!");
+    });
 
-        if (user_rooms[room] == room) {
-            user_rooms[room] = subject;
-        } else {
-            socket.leave(user_rooms[room]);
-            console.log('user left room :' + user_rooms[room]);
-            socket.join(subject);
-            user_rooms[user_co] = subject;
-            console.log('user joined room :' + subject);
-        }
-        console.log(user_rooms);
-        io.on('message', function (msg) {
-            console.log(msg.debug);
-            io.to(subject).emit('message', msg);
+    var sql = "USE irc_server";
+    sock.query(sql, function (err, result) {
+    if (err) throw err;
+    });
+    var sql = "SELECT * FROM irc_channels";
+    sock.query(sql, function (err, chans) {
+        if (err) throw err;
+        var sql = "SELECT * FROM irc_users";
+        sock.query(sql, function (err, users) {
+            if (err) throw err;
+            var sql = "SELECT * FROM irc_messages";
+            sock.query(sql, function (err, messages) {
+                if (err) throw err;
+                console.log("so users are {"+ JSON.stringify(users) +"} have access to these chans {"+ JSON.stringify(chans) + "} and there are the messages {" + JSON.stringify(messages) + "}");
+                
+                console.log('user connected');
+                var name;
+                var room;
+                var subject;
+            
+                socket.on('first_log', function (data) {
+
+                    name = data.name;
+                    room = data.subject;
+            
+                    if (room_name[room] !== null) {
+                        socket.leave(room_name[room]);
+                        socket.join(room_name[room]);
+                        //room_name[room] = subject;
+                        console.log(name + ' joined room :' + room_name[room]);
+                    }
+                    else {
+                        console.log("Bad room error cote front " + room);
+                    }
+                    console.log(room_name[room] + " Xsubject=" + subject);
+                    socket.to(room_name[room]).emit('message', room_name[room]);
+                });
+                socket.on('disconnect', function () {
+                    console.log(name + ' left room :' + room_name[room]);
+                    console.log(name + ' disconnected');
+                });
+                
+            });
+                
         });
+
     });
-    socket.on('disconnect', function () {
-        console.log('user disconnected');
-    });
-});  
-  
+
+});
+
+
 app.post('/register', function (req, res) {
     var the_result = "";
     var name = "";

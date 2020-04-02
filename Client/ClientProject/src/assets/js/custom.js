@@ -1,5 +1,3 @@
-
-
 $(function() {
     $(document).ready(function() {
         var modal1 = document.getElementById('id01');
@@ -73,16 +71,26 @@ $(function() {
 
             var socket = io('ws://localhost:3000', {transports: ['websocket']});
 
+            socket.on('message', function (from, msg) {
+                console.log('GG I received a private message by ', from, ' saying ', msg);
+                alert("ggg2");
+           });
+
             socket.on('connect', function () {
               console.log('connected socket !');
-                                    //dans subject on vettra la room choisit via le front
-              socket.emit('first_log', {subject: 'room', message: 'Hello everyone welcome  :', name : localStorage.getItem("name")});
+            //dans subject on vettra la room choisit via le front via ta partie bryan on changera "room"
+              socket.emit('first_log', {subject: 2, message: 'Hello everyone welcome  :', name : localStorage.getItem("name")});
             });
-            
+
+            socket.on('Salon des Uchiwas', function (from, msg) {
+                console.log('I received a private message by ', from, ' saying ', msg);
+                alert("gg");
+           });
+
             socket.on('respond', function (data) {
               console.log(data);
             });
-                          
+
             $('#buttonsend').click(function(e) {
                 e.preventDefault();
                 alert("test");
