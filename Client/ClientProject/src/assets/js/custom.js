@@ -7,6 +7,7 @@ $(function() {
 
         var modal1 = document.getElementById('id01');
         var modal2 = document.getElementById('id02');
+        var connectedrrom = 100;
 
         if (localStorage.getItem("token") === null) {
             alert("not logged ");
@@ -67,6 +68,32 @@ $(function() {
             //localStorage.setItem("logged", "on");
           }
         else {
+            $.ajax({
+                url: "http://localhost:13008/channels",
+                type: "GET",
+                processData: false,  // indique à jQuery de ne pas traiter les données
+                contentType: false,   // indique à jQuery de ne pas configurer le contentType
+                cache:false,
+                dataType: "json", // Change this according to your response from the server.
+                success : function(result) {
+        
+                    var array = JSON.parse(result);
+                    for (var i = 0; i < array.length; i++) {
+                        $('.channels-list-text').append('<li id='+ i +' class="channel focusable channel-text ">'+ //active
+                            '<span class="channel-name">'+ array[i] +'</span>'+
+                            '<button class="button" role="button" aria-label="Invite"><svg><use xlink:href="#icon-invite" /></svg></button>'+
+                            '<button class="button" role="button" aria-label="settings"><svg><use xlink:href="#icon-channel-settings" /></svg></button>'+
+                        '</li>');
+                        console.log(array[i]);
+                      }
+        
+                    alert(result); // result is an object which is created from the returned JSON
+                    
+                },
+                error: function (e) {
+                    //alert('Error ' + JSON.stringify(e));
+                }});
+
             document.getElementById('dcacc').style.display='block';
             alert("logged gg");
             $('.username').text(localStorage.getItem("name"));
@@ -75,23 +102,41 @@ $(function() {
             var reglage = 0;
 
             var socket = io('ws://localhost:3000', {transports: ['websocket']});
-
             socket.on('connect', function () {
-              console.log('connected socket !');
-            //dans subject on vettra la room choisit via le front via ta partie bryan on changera "room"
-              socket.emit('first_log', {subject: 2, name : localStorage.getItem("name")});
+                console.log('connected socket !');
+              //dans subject on vettra la room choisit via le front via ta partie bryan on changera "room"
+              });
+
+            $('ul').on('click', '.channel', function(e) {
+                if (connectedrrom != 100)
+                $('#'+ connectedrrom).removeClass('active');
+                $('#'+ $(this).attr("id")).addClass('active');
+
+                socket.emit('first_log', {subject: $(this).attr("id"), name : localStorage.getItem("name"), oldroom : connectedrrom});
+
+                //if ($(this).attr("id") != connectedrrom) { 
+                connectedrrom = $(this).attr("id");
+                  e.preventDefault();
+                alert("gg" + $(this).attr("id"));
+                //}
+                //else {
+                    //alert("deconnecting");
+                    //socket.disconnect();
+                //}
             });
 
             //reception des me
             socket.on('message', function (data) {
+                if (data.name)
                 $('#messages').append(data.name + ' : ' + data.msg + '<br />') ;
+                else 
+                $('#messages').append(data.msg + '<br />') ;
            });
 
            /*socket.on(room_name[2], function (data) {
             console.log(data.msg);
             //socket.emit(room_name[room], { name: name, msg: 'Bonjour'});
         });*/
-
 
             $('#buttonsend').click(function(e) {
                 e.preventDefault();

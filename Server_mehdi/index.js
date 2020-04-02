@@ -135,10 +135,18 @@ io.on('connection', function (socket) {
                     room = data.subject;
             
                     if (room_name[room] !== null) {
+                        console.log(data.oldroom , room);
+                        if (data.oldroom != 100) {
+                            console.log(data.oldroom , room);
+                            socket.nsp.to(room_name[data.oldroom]).emit('message', {msg: 'Moi Le grand ' + data.name + ' Je vous dis au revoir et je vous laisse au ' + room_name[room]});
+                            socket.leave(room_name[data.oldroom]);
+                        }
+                        socket.leave(room_name[room]);
                         socket.join(room_name[room]);
                         //room_name[room] = subject;
                         //socket.to(room_name[room]).emit('message', { name: name, msg: 'Je suis nouveau', from: room_name[room]});
-                        socket.nsp.to(room_name[room]).emit('message', {msg: 'Je suis nouveau mon nom est ' + name + ' Je viens au ' + room_name[room]});
+                        console.log("logged user " + name)
+                        socket.nsp.to(room_name[room]).emit('message', {msg: 'Je suis nouveau mon nom est ' + data.name + ' Je viens au ' + room_name[room]});
                     }
                     else {
                         console.log("Bad room error cote front " + room);
@@ -162,15 +170,37 @@ io.on('connection', function (socket) {
                     console.log(name + ' left room :' + room_name[room]);
                     console.log(name + ' disconnected');
                 });
-                
             });
-                
         });
-
     });
-
 });
 
+app.get('/channels', function (req, res) {
+    var reg_connection = mysql.createConnection({
+        host     : 'localhost',
+        user     : 'admin',
+        password : 'root'
+    });
+    reg_connection.connect(function(err) {
+        if (err) throw err;
+        console.log("Connected db!");
+    });
+    var sql = "USE irc_server";
+    reg_connection.query(sql, function (err, result) {
+    if (err) throw err;
+    });
+    // fields fields fields
+    var sql = "SELECT * FROM irc_channels";
+    reg_connection.query(sql, function (err, result) {
+            if (err) throw err;
+        var array = [];
+        for (var i = 0; i < result.length; i++) {
+            array[i] = result[i].name;
+        }
+        var obj = JSON.stringify(array);
+        res.json(obj);
+    });
+});
 
 app.post('/register', function (req, res) {
     var the_result = "";
