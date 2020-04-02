@@ -6,8 +6,9 @@ const http = require('http').Server(app);
 var util = require('util');
 var bodyParser = require('body-parser')
 const formidable = require('express-formidable');
+var cleanser = require('profanity-cleanser');
+cleanser.setLocale(); 
 
-  
 var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'admin',
@@ -130,23 +131,34 @@ io.on('connection', function (socket) {
                 var subject;
             
                 socket.on('first_log', function (data) {
-
                     name = data.name;
                     room = data.subject;
             
                     if (room_name[room] !== null) {
-                        socket.leave(room_name[room]);
                         socket.join(room_name[room]);
                         //room_name[room] = subject;
-                        console.log(name + ' joined room :' + room_name[room]);
+                        //socket.to(room_name[room]).emit('message', { name: name, msg: 'Je suis nouveau', from: room_name[room]});
+                        socket.nsp.to(room_name[room]).emit('message', {msg: 'Je suis nouveau mon nom est ' + name + ' Je viens au ' + room_name[room]});
                     }
                     else {
                         console.log("Bad room error cote front " + room);
                     }
-                    console.log(room_name[room] + " Xsubject=" + subject);
-                    socket.to(room_name[room]).emit('message', room_name[room]);
+                    console.log(room_name[room] + " Xsubject=" + data.subject);
                 });
+
+                socket.on('message', function (data) {
+                    console.log("ther");
+                    var output = data.msg;
+
+                    if (output != null)
+                    output = cleanser.replace(data.msg);
+                    console.log("message to channel " + room_name[room]+"from "+name);
+                    socket.nsp.to(room_name[room]).emit('message', {msg: output, name : data.name});
+                });
+
                 socket.on('disconnect', function () {
+                    socket.leave(room_name[room]);
+                    socket.to(room_name[room]).emit('message', {msg: 'Je me suis déconnecté :' + name + ' J\'étais au ' + room_name[room]});
                     console.log(name + ' left room :' + room_name[room]);
                     console.log(name + ' disconnected');
                 });

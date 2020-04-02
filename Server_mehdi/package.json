@@ -16,6 +16,7 @@
     "express-formidable": "^1.2.0",
     "multiparty": "^4.2.1",
     "mysql": "^2.18.1",
+    "profanity-cleanser": "^1.0.1",
     "socket.io": "^2.3.0",
     "supervisor": "^0.12.0"
   }

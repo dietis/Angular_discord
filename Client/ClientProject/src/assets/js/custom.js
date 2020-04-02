@@ -1,5 +1,10 @@
 $(function() {
     $(document).ready(function() {
+        var room_name = ["Salon de thé kouya",
+                 "Salon des matrixé",
+                 "Salon des Uchiwas",
+                 "Salon des mangeurs de bonne bouffe"];
+
         var modal1 = document.getElementById('id01');
         var modal2 = document.getElementById('id02');
 
@@ -71,37 +76,32 @@ $(function() {
 
             var socket = io('ws://localhost:3000', {transports: ['websocket']});
 
-            socket.on('message', function (from, msg) {
-                console.log('GG I received a private message by ', from, ' saying ', msg);
-                alert("ggg2");
-           });
-
             socket.on('connect', function () {
               console.log('connected socket !');
             //dans subject on vettra la room choisit via le front via ta partie bryan on changera "room"
-              socket.emit('first_log', {subject: 2, message: 'Hello everyone welcome  :', name : localStorage.getItem("name")});
+              socket.emit('first_log', {subject: 2, name : localStorage.getItem("name")});
             });
 
-            socket.on('Salon des Uchiwas', function (from, msg) {
-                console.log('I received a private message by ', from, ' saying ', msg);
-                alert("gg");
+            //reception des me
+            socket.on('message', function (data) {
+                $('#messages').append(data.name + ' : ' + data.msg + '<br />') ;
            });
 
-            socket.on('respond', function (data) {
-              console.log(data);
-            });
+           /*socket.on(room_name[2], function (data) {
+            console.log(data.msg);
+            //socket.emit(room_name[room], { name: name, msg: 'Bonjour'});
+        });*/
+
 
             $('#buttonsend').click(function(e) {
                 e.preventDefault();
-                alert("test");
-                var fd = new FormData();
-
+                alert("test13");
+                /*var fd = new FormData();
                 fd.append("content", $('#story').val());
                 var file = $('#fileinput').prop('files')[0];
                 if (file)
                   formData.append('photo', file, file.name);
-  
-                $.ajax({
+               $.ajax({
                 url: "http://127.0.0.1:13008/register",
                 type: "POST",
                 data: fd,
@@ -117,20 +117,16 @@ $(function() {
                     alert('Error ' + JSON.stringify(e));
                     console.log("Error");
                 }
-                });
+                });*/
+                //socket.emit(room_name[2], {subject: 2, message: 'Hello everyone welcome  :', name : localStorage.getItem("name")});
+                alert("J'envoi " + $('#story').text());
+                socket.emit('message', {subject: 2, name : localStorage.getItem("name"), msg: $('#story').val()});
+            });
+
+            $('#sendmsg').click(function() {
+                //window.localStorage.getItem(key);
             });
         }
-
-        $('#sendmsg').click(function() {
-            //window.localStorage.getItem(key);
-            if (typeof(Storage) !== "undefined") {
-                localStorage.setItem("token", "MYTOKEN");
-                alert(localStorage.getItem("token"));
-            } else {
-                    alert("Sorry, your browser does not support Web Storage...");
-            }
-            alert("gg");
-        });
         $('#dcacc').click(function() {
             localStorage.clear();
         });
