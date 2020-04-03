@@ -10,7 +10,25 @@ $(function() {
         var connectedrrom = 100;
 
         if (localStorage.getItem("token") === null) {
-            alert("not logged ");
+            Swal.fire({
+                title: 'You are not logged!',
+                timer: 2000,
+                icon: 'error',
+                onBeforeOpen: () => {
+                  Swal.showLoading()
+                  timerInterval = setInterval(() => {
+                    const content = Swal.getContent()
+                    if (content) {
+                      const b = content.querySelector('b')
+                      if (b) {
+                        b.textContent = Swal.getTimerLeft()
+                      }
+                    }
+                  }, 100)
+                },
+              });
+            
+              //alert("not logged ");
             document.getElementById('id01').style.display='block';
 
             $('#logdisc').click(function(e) {
@@ -29,7 +47,25 @@ $(function() {
                 success : function(result) {
                     //alert(JSON.stringify(result)); // result is an object which is created from the returned JSON
                     console.log("gg");
-                    alert(result.token);
+                    Swal.fire({
+                        title: "Connection ",
+                        //title: result.token,
+                        timer: 3000,
+                        icon: 'success',
+                        onBeforeOpen: () => {
+                          Swal.showLoading()
+                          timerInterval = setInterval(() => {
+                            const content = Swal.getContent()
+                            if (content) {
+                              const b = content.querySelector('b')
+                              if (b) {
+                                b.textContent = Swal.getTimerLeft()
+                              }
+                            }
+                          }, 100)
+                        },
+                      });
+                    //alert(result.token);
                     localStorage.setItem("token", result.token);
                     localStorage.setItem("name", $('#nameinput').val());
                     document.getElementById('id01').style.display='none';
@@ -54,7 +90,24 @@ $(function() {
                 cache:false,
                 dataType: "json", // Change this according to your response from the server.
                 success : function(result) {
-                    alert(JSON.stringify(result)); // result is an object which is created from the returned JSON
+                    Swal.fire({
+                        title: JSON.stringify(result),
+                        timer: 3000,
+                        icon: 'success',
+                        onBeforeOpen: () => {
+                          Swal.showLoading()
+                          timerInterval = setInterval(() => {
+                            const content = Swal.getContent()
+                            if (content) {
+                              const b = content.querySelector('b')
+                              if (b) {
+                                b.textContent = Swal.getTimerLeft()
+                              }
+                            }
+                          }, 100)
+                        },
+                      });
+                    //alert(JSON.stringify(result)); // result is an object which is created from the returned JSON
                     console.log("gg");
                 },
                 error: function (e) {
@@ -87,7 +140,25 @@ $(function() {
                         console.log(array[i]);
                       }
         
-                    alert(result); // result is an object which is created from the returned JSON
+                      /*Swal.fire({
+                        title: result,
+                        timer: 3000,
+                        icon: 'question',
+                        onBeforeOpen: () => {
+                          Swal.showLoading()
+                          timerInterval = setInterval(() => {
+                            const content = Swal.getContent()
+                            if (content) {
+                              const b = content.querySelector('b')
+                              if (b) {
+                                b.textContent = Swal.getTimerLeft()
+                              }
+                            }
+                          }, 100)
+                        },
+                      }); salon de thé...*/
+
+                    //alert(result); // result is an object which is created from the returned JSON
                     
                 },
                 error: function (e) {
@@ -95,7 +166,35 @@ $(function() {
                 }});
 
             document.getElementById('dcacc').style.display='block';
-            alert("logged gg");
+
+            /*Swal.fire({
+                title: 'Error!',
+                text: 'Do you want to continue',
+                icon: 'error',
+                confirmButtonText: 'Cool'
+              });*/
+             
+              Swal.fire({
+                title: 'You are connected!',
+                timer: 3000,
+                icon: 'success',
+                onBeforeOpen: () => {
+                  Swal.showLoading()
+                  timerInterval = setInterval(() => {
+                    const content = Swal.getContent()
+                    if (content) {
+                      const b = content.querySelector('b')
+                      if (b) {
+                        b.textContent = Swal.getTimerLeft()
+                      }
+                    }
+                  }, 100)
+                },
+              });
+              
+             // alert("logged gg");
+
+//            alert.success("logged gg");
             $('.username').text(localStorage.getItem("name"));
             var mic = 0;
             var casque = 0;
@@ -117,7 +216,8 @@ $(function() {
                 //if ($(this).attr("id") != connectedrrom) { 
                 connectedrrom = $(this).attr("id");
                   e.preventDefault();
-                alert("gg" + $(this).attr("id"));
+                
+                //  alert("gg" + $(this).attr("id")); alert gg0 ...
                 //}
                 //else {
                     //alert("deconnecting");
@@ -129,8 +229,10 @@ $(function() {
             socket.on('message', function (data) {
                 if (data.name)
                 $('#messages').append(data.name + ' : ' + data.msg + '<br />') ;
-                else 
-                $('#messages').append(data.msg + '<br />') ;
+                else if (data.connected)
+                $('#messages').append('<p style="color:green;">' + data.msg +'</p>' + '<br />');
+                else
+                $('#messages').append('<p style="color:red;">' + data.msg +'</p>' + '<br />') ;
            });
 
            /*socket.on(room_name[2], function (data) {
@@ -140,7 +242,7 @@ $(function() {
 
             $('#buttonsend').click(function(e) {
                 e.preventDefault();
-                alert("test13");
+                //alert("test13");
                 /*var fd = new FormData();
                 fd.append("content", $('#story').val());
                 var file = $('#fileinput').prop('files')[0];
@@ -164,7 +266,8 @@ $(function() {
                 }
                 });*/
                 //socket.emit(room_name[2], {subject: 2, message: 'Hello everyone welcome  :', name : localStorage.getItem("name")});
-                alert("J'envoi " + $('#story').text());
+                
+                //alert("J'envoi " + $('#story').text()); message d'envoi
                 socket.emit('message', {subject: 2, name : localStorage.getItem("name"), msg: $('#story').val()});
             });
 
