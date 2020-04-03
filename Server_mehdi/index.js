@@ -3,6 +3,7 @@ const app = express();
 var mysql = require('mysql');
 const bcrypt = require('bcrypt');
 const http = require('http').Server(app);
+const vocal_http = require('http').Server(app);
 var util = require('util');
 var bodyParser = require('body-parser')
 const formidable = require('express-formidable');
@@ -75,6 +76,9 @@ room_name.forEach(function (item, index) {
     });
 });
 
+var vocal_room = ["Salon de la voix ;)"];
+
+
 //messages
 var sql = "CREATE TABLE IF NOT EXISTS irc_messages (id INT AUTO_INCREMENT PRIMARY KEY, content VARCHAR(255), user VARCHAR(255), file VARCHAR(255))";
 
@@ -92,6 +96,7 @@ app.get('/', function (req, res) {
 });
 
 var io = require('socket.io')(http);
+var vocal_io = require('socket.io')(vocal_http);
 
 //ioconnection
 //io.set('origins', 'http://127.0.0.1:4200');
@@ -155,6 +160,10 @@ io.on('connection', function (socket) {
                     console.log(room_name[room] + " Xsubject=" + data.subject);
                 });
 
+                socket.on('first_log_vocal', function (data) {
+
+                });
+
                 socket.on('message', function (data) {
                     console.log("ther");
                     var output = data.msg;
@@ -162,7 +171,8 @@ io.on('connection', function (socket) {
                     if (output != null)
                     output = cleanser.replace(data.msg);
                     console.log("message to channel " + room_name[room]+"from "+name);
-                    socket.nsp.to(room_name[room]).emit('message', {msg: output, name : data.name});
+
+                    socket.nsp.to(room_name[room]).emit('message', {msg: output, name : data.name, filedata : data.filedata });
                 });
 
                 socket.on('disconnect', function () {
@@ -336,5 +346,9 @@ app.listen(13008, function () {
 });
     
 http.listen(3000, function () {
+    console.log('http sock listening on *:3000');
+});
+
+vocal_http.listen(3001, function () {
     console.log('http sock listening on *:3000');
 });

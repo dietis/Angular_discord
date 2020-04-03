@@ -227,8 +227,14 @@ $(function() {
 
             //reception des me
             socket.on('message', function (data) {
-                if (data.name)
-                $('#messages').append(data.name + ' : ' + data.msg + '<br />') ;
+              if (data.filedata) {
+                $('#messages').append(data.name + ' : ' + data.msg +  '<img src="'+ data.filedata +'" height=480 width=480> </img>' + '<br />');
+              }
+              else
+                if (data.name) {
+                    $('#messages').append(data.name + ' : ' + data.msg +'<br />');
+                    console.log(data.filedata);
+                  }
                 else if (data.connected)
                 $('#messages').append('<p style="color:green;">' + data.msg +'</p>' + '<br />');
                 else
@@ -268,7 +274,24 @@ $(function() {
                 //socket.emit(room_name[2], {subject: 2, message: 'Hello everyone welcome  :', name : localStorage.getItem("name")});
                 
                 //alert("J'envoi " + $('#story').text()); message d'envoi
-                socket.emit('message', {subject: 2, name : localStorage.getItem("name"), msg: $('#story').val()});
+                var file = $('#fileinput').prop('files')[0];
+                var datafile;
+                var filefound = 0;
+
+                if (file) {
+                  var reader = new FileReader();
+                  reader.onload = function() {
+                    var binaryString = this.result;
+                    datafile = binaryString;
+                    filefound = 1;
+                    socket.emit('message', {subject: 2, name : localStorage.getItem("name"), msg: $('#story').val(), filedata: this.result });
+                  }
+                  reader.readAsDataURL(file);
+                  if (filefound == 0)
+                    socket.emit('message', {subject: 2, name : localStorage.getItem("name"), msg: $('#story').val() });
+                }
+                 else 
+                socket.emit('message', {subject: 2, name : localStorage.getItem("name"), msg: $('#story').val() });
             });
 
             $('#sendmsg').click(function() {
@@ -278,5 +301,8 @@ $(function() {
         $('#dcacc').click(function() {
             localStorage.clear();
         });
+        function hexToBase64(str) {
+          return btoa(String.fromCharCode.apply(null, str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" ")));
+      }
     });
 });

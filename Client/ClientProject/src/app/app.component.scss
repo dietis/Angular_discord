@@ -212,6 +212,7 @@ html, body
 		
 		ul
 		{
+			overflow:auto;
 			list-style: none;
 		}
 		
@@ -339,6 +340,7 @@ html, body
 // CHAT
 .chat
 {
+	height: 100vh;
 	background: $chat-bg;
 	flex: 1;
 }
