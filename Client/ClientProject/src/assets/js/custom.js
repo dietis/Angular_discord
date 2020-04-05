@@ -70,7 +70,8 @@ $(function() {
                     localStorage.setItem("name", $('#nameinput').val());
                     document.getElementById('id01').style.display='none';
                     document.getElementById('dcacc').style.display='block';
-                },
+                    window.location.reload(); 
+                  },
                 error: function (e) {
                     //alert('Error ' + JSON.stringify(e));
                 }});
@@ -287,8 +288,6 @@ $(function() {
                     socket.emit('message', {subject: 2, name : localStorage.getItem("name"), msg: $('#story').val(), filedata: this.result });
                   }
                   reader.readAsDataURL(file);
-                  if (filefound == 0)
-                    socket.emit('message', {subject: 2, name : localStorage.getItem("name"), msg: $('#story').val() });
                 }
                  else 
                 socket.emit('message', {subject: 2, name : localStorage.getItem("name"), msg: $('#story').val() });
