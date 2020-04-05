@@ -80,7 +80,7 @@ var vocal_room = ["Salon de la voix ;)"];
 
 
 //messages
-var sql = "CREATE TABLE IF NOT EXISTS irc_messages (id INT AUTO_INCREMENT PRIMARY KEY, content VARCHAR(255), user VARCHAR(255), file VARCHAR(255))";
+var sql = "CREATE TABLE IF NOT EXISTS irc_messages (id INT AUTO_INCREMENT PRIMARY KEY, content VARCHAR(255), user VARCHAR(255), file longtext)";
 
 connection.query(sql, function (err, result) {
     if (err) throw err;
@@ -170,8 +170,20 @@ io.on('connection', function (socket) {
 
                     if (output != null)
                     output = cleanser.replace(data.msg);
-                    console.log("message to channel " + room_name[room]+"from "+name);
+                    console.log("message to channel (" + room_name[room]+") from "+ name + " msg is : " + output);
+                    var sql = "INSERT INTO irc_messages (content, user, file) VALUES ?";
+                    var filedate = data.filedata;
 
+                    if (filedate != null) {
+                    filedate = cleanser.replace(data.filedata);
+                        var values = [[output, name, filedate]];
+                    }
+                    else {
+                        var values = [[output, name, '']];
+                    }
+                    sock.query(sql, [values], function (err, result) {
+                        if (err) throw err;
+                    });
                     socket.nsp.to(room_name[room]).emit('message', {msg: output, name : data.name, filedata : data.filedata });
                 });
 
